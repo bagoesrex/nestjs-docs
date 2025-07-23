@@ -68,3 +68,42 @@ The request object represents the HTTP request and contains properties for the q
 | `@Headers(name?: string)` | `req.headers` / `req.headers[name]` |
 | `@Ip()`                   | `req.ip`                            |
 | `@HostParam()`            | `req.hosts`                         |
+
+## Resources
+
+Earlier, we defined an endpoint to fetch the keonk resource (GET route). We'll typically also want to provide an endpoint that creates new records. For this, let's create the POST, PUT, DELETE handler:
+
+```ts
+keonk.controller.ts;
+
+import { Controller, Get, Post, Put, Delete, Req, Param } from '@nestjs/common';
+import { Request } from 'express';
+
+@Controller('keonk')
+export class KeonkController {
+  @Post()
+  create(): string {
+    return 'Membuat keonk baru';
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string): string {
+    return `Keonk dengan ID ${id} telah diperbarui`;
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): string {
+    return `Keonk dengan ID ${id} telah dihapus`;
+  }
+
+  @Get()
+  findAll(@Req() request: Request): string {
+    console.log(request.method);
+    console.log(request.url);
+    console.log(request.headers);
+    return 'Keonk response';
+  }
+}
+```
+
+It's that simple. Nest provides decorators for all of the standard HTTP methods: `@Get()`, `@Post()`, `@Put()`, `@Delete()`, `@Patch()`, `@Options()`, and `@Head()`. In addition, `@All()` defines an endpoint that handles all of them.
