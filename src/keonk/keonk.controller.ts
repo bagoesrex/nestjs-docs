@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Delete, Req, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode } from '@nestjs/common';
 import { Request } from 'express';
 
 @Controller('keonk')
 export class KeonkController {
     @Post()
+    @HttpCode(202)
     create(): string {
         return 'Membuat keonk baru';
     }

@@ -118,3 +118,18 @@ Pattern-based routes are also supported in NestJS. For example, the asterisk (`*
     return 'When Get abcd/keonk abcd/meonk abcd/miaw or abcd/* anythings';
   }
 ```
+
+## Status code
+
+As mentioned, the default status code for responses is always 200, except for POST requests, which default to 201. You can easily change this behavior by using the `@HttpCode(...)` decorator at the handler level.
+
+```ts
+  @Post()
+  @HttpCode(202)
+  create(): string {
+      return 'Membuat keonk baru';
+  }
+```
+
+> **Hint**
+> Import ``HttpCode`` from the`` @nestjs/common`` package.
