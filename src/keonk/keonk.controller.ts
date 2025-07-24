@@ -25,4 +25,9 @@ export class KeonkController {
         console.log(request.headers);
         return 'Keonk response';
     }
+
+    @Get('abcd/*')
+    handleWildcard(): string {
+        return 'When Get abcd/keonk abcd/meonk abcd/miaw or abcd/* anythings';
+    }
 }

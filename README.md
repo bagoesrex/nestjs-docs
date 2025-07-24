@@ -107,3 +107,14 @@ export class KeonkController {
 ```
 
 It's that simple. Nest provides decorators for all of the standard HTTP methods: `@Get()`, `@Post()`, `@Put()`, `@Delete()`, `@Patch()`, `@Options()`, and `@Head()`. In addition, `@All()` defines an endpoint that handles all of them.
+
+## Route wildcards
+
+Pattern-based routes are also supported in NestJS. For example, the asterisk (`*`) can be used as a wildcard to match any combination of characters in a route at the end of a path. In the following example, the `handleWildcard()` method will be executed for any route that starts with `abcd/`, regardless of the number of characters that follow.
+
+```ts
+  @Get('abcd/*')
+  handleWildcard(): string {
+    return 'When Get abcd/keonk abcd/meonk abcd/miaw or abcd/* anythings';
+  }
+```
