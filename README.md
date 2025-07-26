@@ -132,4 +132,19 @@ As mentioned, the default status code for responses is always 200, except for PO
 ```
 
 > **Hint**
-> Import ``HttpCode`` from the`` @nestjs/common`` package.
+> Import `HttpCode` from the` @nestjs/common` package.
+
+## Response headers
+
+To specify a custom response header, you can either use a `@Header()` decorator or a library-specific response object (and call `res.header()` directly).
+
+```ts
+  @Post()
+  @Header('Cache-Control', 'no-store')
+  create(): string {
+      return 'Membuat keonk baru';
+  }
+```
+
+> **Hint**
+> Import `Header` from the` @nestjs/common package`.
