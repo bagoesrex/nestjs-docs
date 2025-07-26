@@ -44,4 +44,9 @@ export class KeonkController {
             return { url: 'https://docs.nestjs.com/v5' };
         }
     }
+
+    @Get(':id')
+    findOne(@Param('id') id: string): string {
+      return `This action returns a #${id} keonk`;
+    }
 }

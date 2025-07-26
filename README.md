@@ -176,3 +176,30 @@ Returned values will override any arguments passed to the `@Redirect()` decorato
   }
 
 ```
+
+## Route parameters
+
+Routes with static paths won’t work when you need to accept dynamic data as part of the request (e.g., `GET /keonk/1` to get the cat with id `1`). To define routes with parameters, you can add route parameter **tokens** in the route path to capture the dynamic values from the URL. The route parameter token in the `@Get()` decorator example below illustrates this approach. These route parameters can then be accessed using the `@Param()` decorator, which should be added to the method signature.
+
+> **Hint**
+> Routes with parameters should be declared after any static paths. This prevents the parameterized paths from intercepting traffic destined for the static paths.
+
+```ts
+  @Get(':id')
+  findOne(@Param() params: any): string {
+    console.log(params.id);
+    return `This action returns a #${params.id} keonk`;
+  }
+```
+
+The `@Param()` decorator is used to decorate a method parameter (in the example above, `params`), making the route parameters accessible as properties of that decorated method parameter inside the method. As shown in the code, you can access the `id` parameter by referencing `params.id`. Alternatively, you can pass a specific parameter token to the decorator and directly reference the route parameter by name within the method body.
+
+> **Hint**
+> Import `Param` from the `@nestjs/common` package.
+
+```ts
+  @Get(':id')
+  findOne(@Param('id') id: string): string {
+    return `This action returns a #${id} keonk`;
+  }
+```
