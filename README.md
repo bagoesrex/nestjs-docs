@@ -148,3 +148,31 @@ To specify a custom response header, you can either use a `@Header()` decorator 
 
 > **Hint**
 > Import `Header` from the` @nestjs/common package`.
+
+## Redirection
+
+To redirect a response to a specific URL, you can either use a `@Redirect()` decorator or a library-specific response object (and call `res.redirect()` directly).
+
+`@Redirect()` takes two arguments, `url` and `statusCode`, both are optional. The default value of `statusCode` is `302` (`Found`) if omitted.
+
+```ts
+  @Get('portfolio')
+  @Redirect('https://bagoes.dev', 301)
+  redirectPortfolio(): void { }
+```
+
+> **Hint**
+> Sometimes you may want to determine the HTTP status code or the redirect URL dynamically. Do this by returning an object following the `HttpRedirectResponse` interface (from `@nestjs/common`).
+
+Returned values will override any arguments passed to the `@Redirect()` decorator. For example:
+
+```ts
+  @Get('docs')
+  @Redirect('https://docs.nestjs.com', 302)
+  getDocs(@Query('version') version) {
+    if (version && version === '5') {
+     return { url: 'https://docs.nestjs.com/v5' };
+    }
+  }
+
+```

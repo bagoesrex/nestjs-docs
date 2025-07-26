@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header, Redirect, Query } from '@nestjs/common';
 import { Request } from 'express';
 
 @Controller('keonk')
@@ -31,5 +31,17 @@ export class KeonkController {
     @Get('abcd/*')
     handleWildcard(): string {
         return 'When Get abcd/keonk abcd/meonk abcd/miaw or abcd/* anythings';
+    }
+
+    @Get('portfolio')
+    @Redirect('https://bagoes.dev', 301)
+    redirectPortfolio(): void { }
+
+    @Get('docs')
+    @Redirect('https://docs.nestjs.com', 302)
+    getDocs(@Query('version') version) {
+        if (version && version === '5') {
+            return { url: 'https://docs.nestjs.com/v5' };
+        }
     }
 }
