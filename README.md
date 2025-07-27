@@ -203,3 +203,29 @@ The `@Param()` decorator is used to decorate a method parameter (in the example 
     return `This action returns a #${id} keonk`;
   }
 ```
+
+## Sub-domain routing
+
+The `@Controller` decorator can take a host option to require that the HTTP host of the incoming requests matches some specific value.
+
+```ts
+@Controller({ host: 'etmin.example.com' })
+export class KeonkController {
+  @Get()
+  index(): string {
+    return 'Keonk akan merespon jika host berasal dari etmin.example.com';
+  }
+}
+```
+
+Similar to a route `path`, the `host` option can use tokens to capture the dynamic value at that position in the host name. The host parameter token in the `@Controller()` decorator example below demonstrates this usage. Host parameters declared in this way can be accessed using the `@HostParam()` decorator, which should be added to the method signature.
+
+```ts
+@Controller({ host: ':account.example.com' })
+export class KeonkController {
+  @Get()
+  getInfo(@HostParam('account') account: string) {
+    return account;
+  }
+}
+```
