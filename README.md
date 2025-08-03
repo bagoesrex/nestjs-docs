@@ -235,3 +235,29 @@ export class KeonkController {
 For developers coming from other programming languages, it might be surprising to learn that in Nest, nearly everything is `shared across incoming requests`. This includes resources like the database connection pool, `singleton services` with global state, and more. It's important to understand that Node.js doesn't use the request/response `Multi-Threaded Stateless Model`, where each request is handled by a separate thread. As a result, using singleton instances in Nest is completely safe for our applications.
 
 That said, there are specific edge cases where having request-based lifetimes for controllers may be necessary. Examples include per-request caching in GraphQL applications, request tracking, or implementing multi-tenancy.
+
+## Asynchronicity
+
+We love modern JavaScript, especially its emphasis on **asynchronous** data handling. That’s why Nest fully supports `async` functions. Every `async` function must return a `Promise`, which allows you to return a deferred value that Nest can resolve automatically. Here's an example:
+
+```ts
+keonk.controller.ts;
+
+  @Get()
+  async findAll(): Promise<any[]> {
+      return [];
+  }
+```
+
+This code is perfectly valid. But Nest takes it a step further by allowing route handlers to return RxJS **observable streams** as well. Nest will handle the subscription internally and resolve the final emitted value once the stream completes.
+
+```ts
+keonk.controller.ts;
+
+  @Get()
+  async findAll(): Observable<any[]> {
+      return of([]);
+  }
+```
+
+Both approaches are valid, and you can choose the one that best suits your needs.

@@ -21,11 +21,11 @@ export class KeonkController {
     }
 
     @Get()
-    findAll(@Req() request: Request): string {
+    async findAll(@Req() request: Request): Promise<string> {
         console.log(request.method);
         console.log(request.url);
         console.log(request.headers);
-        return 'Keonk response';
+        return 'Keonk response async';
     }
 
     @Get('abcd/*')
@@ -47,6 +47,6 @@ export class KeonkController {
 
     @Get(':id')
     findOne(@Param('id') id: string): string {
-      return `This action returns a #${id} keonk`;
+        return `This action returns a #${id} keonk`;
     }
 }
