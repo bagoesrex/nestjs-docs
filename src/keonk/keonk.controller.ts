@@ -1,14 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header, Redirect, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header, Redirect, Query, Body } from '@nestjs/common';
 import { Request } from 'express';
+import { CreateKeonkDto } from './create-keonk.dto';
 
 @Controller('keonk')
 export class KeonkController {
-    @Post()
-    @Header('Cache-Control', 'no-store')
-    @HttpCode(202)
-    create(): string {
-        return 'Membuat keonk baru';
-    }
+    // @Post()
+    // @Header('Cache-Control', 'no-store')
+    // @HttpCode(202)
+    // create(): string {
+    //     return 'Membuat keonk baru';
+    // }
 
     @Put(':id')
     update(@Param('id') id: string): string {
@@ -48,5 +49,10 @@ export class KeonkController {
     @Get(':id')
     findOne(@Param('id') id: string): string {
         return `This action returns a #${id} keonk`;
+    }
+
+    @Post()
+    async create(@Body() createKeonkDto: CreateKeonkDto) {
+        return 'This action membuat keonk baru';
     }
 }

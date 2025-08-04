@@ -261,3 +261,35 @@ keonk.controller.ts;
 ```
 
 Both approaches are valid, and you can choose the one that best suits your needs.
+
+## Request Payloads
+
+In our previous example, the POST route handler didn’t accept any client parameters. Let's fix that by adding the `@Body()` decorator.
+
+Before we proceed (if you're using TypeScript), we need to define the **DTO** (Data Transfer Object) schema. A DTO is an object that specifies how data should be sent over the network. We could define the DTO schema using **TypeScript** interfaces or simple classes. However, we recommend using classes here. Why? **Classes** are part of the JavaScript ES6 standard, so they remain intact as real entities in the compiled JavaScript. In contrast, TypeScript interfaces are removed during transpilation, meaning Nest can't reference them at runtime. This is important because features like **Pipes** rely on having access to the metatype of variables at runtime, which is only possible with classes.
+
+Let's create the `CreateKeonkDto` class:
+
+```ts
+create_keonk.dto.ts;
+
+export class CreateKeonkDto {
+  name: string;
+  age: number;
+  breed: string;
+}
+```
+
+It has only three basic properties. Thereafter we can use the newly created DTO inside the `KeonkController`:
+
+```ts
+keonk.controller.ts;
+
+    @Post()
+    async create(@Body() createKeonkDto: CreateKeonkDto) {
+        return 'This action membuat keonk baru';
+    }
+```
+
+> **Hint**
+> Our `ValidationPipe` can filter out properties that should not be received by the method handler. In this case, we can whitelist the acceptable properties, and any property not included in the whitelist is automatically stripped from the resulting object. In the `CreateKeonkDto` example, our whitelist is the `name`, `age`, and `breed` properties.
