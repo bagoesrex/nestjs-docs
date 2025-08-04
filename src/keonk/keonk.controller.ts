@@ -21,12 +21,18 @@ export class KeonkController {
         return `Keonk dengan ID ${id} telah dihapus`;
     }
 
+    // @Get()
+    // async findAll(@Req() request: Request): Promise<string> {
+    //     console.log(request.method);
+    //     console.log(request.url);
+    //     console.log(request.headers);
+    //     return 'Keonk response async';
+    // }
+
+
     @Get()
-    async findAll(@Req() request: Request): Promise<string> {
-        console.log(request.method);
-        console.log(request.url);
-        console.log(request.headers);
-        return 'Keonk response async';
+    async findAll(@Query('age') age: number, @Query('breed') breed: string) {
+        return `This action returns all keonks filtered by age: ${age} and breed: ${breed}`;
     }
 
     @Get('abcd/*')

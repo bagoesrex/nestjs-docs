@@ -293,3 +293,53 @@ keonk.controller.ts;
 
 > **Hint**
 > Our `ValidationPipe` can filter out properties that should not be received by the method handler. In this case, we can whitelist the acceptable properties, and any property not included in the whitelist is automatically stripped from the resulting object. In the `CreateKeonkDto` example, our whitelist is the `name`, `age`, and `breed` properties.
+
+## Query parameters
+
+When handling query parameters in your routes, you can use the `@Query()` decorator to extract them from incoming requests. Let's see how this works in practice.
+
+Consider a route where we want to filter a list of keonks based on query parameters like `age` and `breed`. First, define the query parameters in the KeonkController:
+
+```ts
+keonk.controller.ts;
+
+  @Get()
+  async findAll(@Query('age') age: number, @Query('breed') breed: string) {
+      return `This action returns all keonks filtered by age: ${age} and breed: ${breed}`;
+  }
+```
+
+In this example, the `@Query()` decorator is used to extract the values of `age` and `breed` from the query string. For example, a request to:
+
+```http
+GET /cats?age=3&breed=Jawanese
+```
+
+would result in age being 3 and breed being Jawanese.
+If your application requires handling more complex query parameters, such as nested objects or arrays:
+
+```http
+?filter[where][name]=John&filter[where][age]=30
+?item[]=1&item[]=2
+```
+
+you'll need to configure your HTTP adapter (Express or Fastify) to use an appropriate query parser. In Express, you can use the `extended` parser, which allows for rich query objects:
+
+```ts
+const app = await NestFactory.create<NestExpressApplication>(AppModule);
+app.set('query parser', 'extended');
+```
+
+In Fastify, you can use the `querystringParser` option:
+
+```ts
+const app = await NestFactory.create<NestFastifyApplication>(
+  AppModule,
+  new FastifyAdapter({
+    querystringParser: (str) => qs.parse(str),
+  }),
+);
+```
+
+> **Hint**
+> `qs` is a querystring parser that supports nesting and arrays. You can install it using `npm install qs`.
