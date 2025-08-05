@@ -343,3 +343,54 @@ const app = await NestFactory.create<NestFastifyApplication>(
 
 > **Hint**
 > `qs` is a querystring parser that supports nesting and arrays. You can install it using `npm install qs`.
+
+## Full resource sample
+
+Below is an example that demonstrates the use of several available decorators to create a basic controller. This controller provides a few methods to access and manipulate internal data.
+
+```ts
+keonks.controller.ts;
+
+import {
+  Controller,
+  Get,
+  Query,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { CreateKeonkDto, UpdateKeonkDto, ListAllEntities } from './dto';
+
+@Controller('keonks')
+export class KeonksController {
+  @Post()
+  create(@Body() createKeonkDto: CreateKeonkDto) {
+    return 'This action membuat keonk baru';
+  }
+
+  @Get()
+  findAll(@Query() query: ListAllEntities) {
+    return `This action menampilkan semua keonks (limit: ${query.limit} items)`;
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return `This action menghasilkan keonk #${id}`;
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateKeonkDto: UpdateKeonkDto) {
+    return `This action memperbarui keonk dengan id #${id}`;
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return `This action mengapus keonk dengan id #${id}`;
+  }
+}
+```
+
+> **Hint**
+> Nest CLI offers a generator (schematic) that automatically creates **all the boilerplate code**, saving you from doing this manually and improving the overall developer experience.
