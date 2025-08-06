@@ -394,3 +394,23 @@ export class KeonksController {
 
 > **Hint**
 > Nest CLI offers a generator (schematic) that automatically creates **all the boilerplate code**, saving you from doing this manually and improving the overall developer experience.
+
+## Getting up and running
+
+Even with the `KeonksController` fully defined, Nest doesn't yet know about it and won't automatically create an instance of the class.
+
+Controllers must always be part of a module, which is why we include the `controllers` array within the `@Module()` decorator. Since we haven’t defined any other modules apart from the root `AppModule`, we’ll use it to register the `KeonksController`:
+
+```ts
+app.module.ts;
+
+import { Module } from '@nestjs/common';
+import { KeonksController } from './keonks/.controller';
+
+@Module({
+  controllers: [KeonksController],
+})
+export class AppModule {}
+```
+
+We attached the metadata to the module class using the `@Module()` decorator, and now Nest can easily determine which controllers need to be mounted.

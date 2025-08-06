@@ -2,8 +2,8 @@ import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header, Redir
 import { Request } from 'express';
 import { CreateKeonkDto } from './create-keonk.dto';
 
-@Controller('keonk')
-export class KeonkController {
+@Controller('keonks')
+export class KeonksController {
     // @Post()
     // @Header('Cache-Control', 'no-store')
     // @HttpCode(202)
