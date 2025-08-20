@@ -414,3 +414,39 @@ export class AppModule {}
 ```
 
 We attached the metadata to the module class using the `@Module()` decorator, and now Nest can easily determine which controllers need to be mounted.
+
+## Library-specific approach
+
+So far, we've covered the standard Nest way of manipulating responses. Another approach is to use a library-specific response object. To inject a specific response object, we can use the `@Res()` decorator. To highlight the differences, let’s rewrite the `KeonksController` like this:
+
+```ts
+import { Controller, Get, Post, Res, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
+
+@Controller('keonks')
+export class KeonksController {
+  @Post()
+  create(@Res() res: Response) {
+    res.status(HttpStatus.CREATED).send();
+  }
+
+  @Get()
+  findAll(@Res() res: Response) {
+    res.status(HttpStatus.OK).json([]);
+  }
+}
+```
+
+While this approach works and offers more flexibility by giving full control over the response object (such as header manipulation and access to library-specific features), it should be used with caution. Generally, this method is less clear and comes with some downsides. The main disadvantage is that your code becomes platform-dependent, as different underlying libraries may have different APIs for the response object. Additionally, it can make testing more challenging, as you'll need to mock the response object, among other things.
+
+Furthermore, by using this approach, you lose compatibility with Nest features that rely on standard response handling, such as Interceptors and the `@HttpCode()` / `@Header()` decorators. To address this, you can enable the `passthrough` option like this:
+
+```ts
+@Get()
+findAll(@Res({ passthrough: true }) res: Response) {
+  res.status(HttpStatus.OK);
+  return [];
+}
+```
+
+With this approach, you can interact with the native response object (for example, setting cookies or headers based on specific conditions), while still allowing the framework to handle the rest.

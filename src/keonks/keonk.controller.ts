@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header, Redirect, Query, Body } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, Post, Put, Delete, Req, Param, HttpCode, Header, Redirect, Query, Body, Res, HttpStatus } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { CreateKeonkDto } from './create-keonk.dto';
 
 @Controller('keonks')
@@ -30,10 +30,10 @@ export class KeonksController {
     // }
 
 
-    @Get()
-    async findAll(@Query('age') age: number, @Query('breed') breed: string) {
-        return `This action returns all keonks filtered by age: ${age} and breed: ${breed}`;
-    }
+    // @Get()
+    // async findAll(@Query('age') age: number, @Query('breed') breed: string) {
+    //     return `This action returns all keonks filtered by age: ${age} and breed: ${breed}`;
+    // }
 
     @Get('abcd/*')
     handleWildcard(): string {
@@ -57,8 +57,18 @@ export class KeonksController {
         return `This action returns a #${id} keonk`;
     }
 
+    // @Post()
+    // async create(@Body() createKeonkDto: CreateKeonkDto) {
+    //     return 'This action membuat keonk baru';
+    // }
+
     @Post()
-    async create(@Body() createKeonkDto: CreateKeonkDto) {
-        return 'This action membuat keonk baru';
+    create(@Res() res: Response) {
+        res.status(HttpStatus.CREATED).send();
+    }
+
+    @Get()
+    findAll(@Res({ passthrough: true }) res: Response) {
+        res.status(HttpStatus.OK).json([]);
     }
 }
