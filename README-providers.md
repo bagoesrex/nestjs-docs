@@ -107,3 +107,15 @@ export class KeonksController {
 ```
 
 The `KeonksService` is injected through the class constructor. Notice the use of the `private` keyword. This shorthand allows us to both declare and initialize the `keonksService` member in the same line, streamlining the process.
+
+## Dependency injection
+
+Nest is built around the powerful design pattern known as **Dependency Injection**. We highly recommend reading a great article about this concept in the official [Angular documentation](https://angular.dev/guide/di).
+
+In Nest, thanks to TypeScript's capabilities, managing dependencies is straightforward because they are resolved based on their type. In the example below, Nest will resolve the `keonksService` by creating and returning an instance of `KeonksService` (or, in the case of a singleton, returning the existing instance if it has already been requested elsewhere). This dependency is then injected into your controller's constructor (or assigned to the specified property):
+
+```ts
+
+constructor(private keonksService: KeonksService) {}
+
+```
