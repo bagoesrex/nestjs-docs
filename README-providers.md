@@ -8,3 +8,102 @@ In the previous chapter, we created a simple `KeonksController`. Controllers sho
 
 > **Hint**
 > Since Nest enables you to design and organize dependencies in an object-oriented manner, we strongly recommend following the **SOLID principles**.
+
+## Services
+
+Let's begin by creating a simple `KeonksService`. This service will handle data storage and retrieval, and it will be used by the `KeonksController`. Because of its role in managing the application's logic, it’s an ideal candidate to be defined as a provider.
+
+```ts
+keonks.service.ts;
+
+import { Injectable } from '@nestjs/common';
+import { Keonk } from 'src/interfaces/keonk.interface';
+
+@Injectable()
+export class KeonksService {
+  private readonly keonks: Keonk[] = [];
+
+  create(keonk: Keonk) {
+    this.keonks.push(keonk);
+  }
+
+  findAll(): Keonk[] {
+    return this.keonks;
+  }
+}
+```
+
+> **Hint**
+> To create a service using the CLI, simply execute the `$ nest g service keonks` command.
+
+Our KeonksService is a basic class with one property and two methods. The key addition here is the `@Injectable()` decorator. This decorator attaches metadata to the class, signaling that `KeonksService` is a class that can be managed by the Nest IoC container.
+
+Additionally, this example makes use of a Keonk interface, which likely looks something like this:
+
+```ts
+interfaces / keonk.interface.ts;
+
+import { Injectable } from '@nestjs/common';
+import { Keonk } from 'src/interfaces/keonk.interface';
+
+@Injectable()
+export class KeonksService {
+  private readonly keonks: Keonk[] = [];
+
+  create(keonk: Keonk) {
+    this.keonks.push(keonk);
+  }
+
+  findAll(): Keonk[] {
+    return this.keonks;
+  }
+}
+```
+
+Now that we have a service class to retrieve keonks, let's use it inside the `KeonksController`:
+
+```ts
+interfaces / keonk.interface.ts;
+
+import { Injectable } from '@nestjs/common';
+import { Keonk } from 'src/interfaces/keonk.interface';
+
+@Injectable()
+export class KeonksService {
+  private readonly keonks: Keonk[] = [];
+
+  create(keonk: Keonk) {
+    this.keonks.push(keonk);
+  }
+
+  findAll(): Keonk[] {
+    return this.keonks;
+  }
+}
+```
+
+Now that we have a service class to retrieve keonks, let's use it inside the `KeonksController`:
+
+```ts
+import { Controller, Get, Post, Body } from '@nestjs/common';
+import { KeonksService } from './keonks.service';
+import { CreateKeonkDto } from './create-keonk.dto';
+import { Keonk } from 'src/interfaces/keonk.interface';
+
+@Controller('keonks')
+export class KeonksController {
+  constructor(private keonksService: KeonksService) {}
+
+  @Post()
+  async create(@Body() createKeonkDto: CreateKeonkDto) {
+    this.keonksService.create(createKeonkDto);
+  }
+
+  @Get()
+  async findAll(): Promise<Keonk[]> {
+    return this.keonksService.findAll();
+  }
+}
+```
+
+The `KeonksService` is injected through the class constructor. Notice the use of the `private` keyword. This shorthand allows us to both declare and initialize the `keonksService` member in the same line, streamlining the process.
