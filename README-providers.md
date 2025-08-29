@@ -161,3 +161,27 @@ export class HttpService<T> {
 
 > **Warning**
 > If your class doesn't extend another class, it's generally better to use **constructor-based** injection. The constructor clearly specifies which dependencies are required, offering better visibility and making the code easier to understand compared to class properties annotated with `@Inject`.
+
+## Provider registration
+
+Now that we've defined a provider (`KeonksService`) and a consumer (`KeonksController`), we need to register the service with Nest so that it can handle the injection. This is done by editing the module file (`app.module.ts`) and adding the service to the `providers` array in the `@Module()` decorator.
+
+```ts
+app.module.ts;
+
+import { Module } from '@nestjs/common';
+import { KeonksController } from './keonks/keonks.controller';
+import { KeonksService } from './keonks/keonks.service';
+
+@Module({
+  controllers: [KeonksController],
+  providers: [KeonksService],
+})
+export class AppModule {}
+```
+
+Nest will now be able to resolve the dependencies of the `KeonksController` class.
+
+At this point, our directory structure should look like this:
+
+![Provider-registration Image](./docs/images/provider-registration.png)
