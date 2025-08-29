@@ -144,3 +144,20 @@ export class HttpService<T> {
 ```
 
 In the example above, we're using a custom provider, which is why we include the `HTTP_OPTIONS` custom **token**. Previous examples demonstrated constructor-based injection, where a dependency is indicated through a class in the constructor.
+
+## Property-based injection
+
+The technique we've used so far is called constructor-based injection, where providers are injected through the constructor method. In certain specific cases, **property-based injection** can be useful. For example, if your top-level class depends on one or more providers, passing them all the way up through `super()` in sub-classes can become cumbersome. To avoid this, you can use the `@Inject()` decorator directly at the property level.
+
+```ts
+import { Injectable, Inject } from '@nestjs/common';
+
+@Injectable()
+export class HttpService<T> {
+  @Inject('HTTP_OPTIONS')
+  private readonly httpClient: T;
+}
+```
+
+> **Warning**
+> If your class doesn't extend another class, it's generally better to use **constructor-based** injection. The constructor clearly specifies which dependencies are required, offering better visibility and making the code easier to understand compared to class properties annotated with `@Inject`.
