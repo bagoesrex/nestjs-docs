@@ -98,3 +98,25 @@ As seen above, Modules can export their internal providers. In addition, they ca
 })
 export class CoreModule {}
 ```
+
+## Dependency injection
+
+A module class can **inject** providers as well (e.g., for configuration purposes):
+
+```ts
+keonks.module.ts;
+
+import { Module } from '@nestjs/common';
+import { KeonksController } from './keonks.controller';
+import { KeonksService } from './keonks.service';
+
+@Module({
+  controllers: [KeonksController],
+  providers: [KeonksService],
+})
+export class KeonksModule {
+  constructor(private keonksService: KeonksService) {}
+}
+```
+
+However, module classes themselves cannot be injected as providers due to [circular dependency](https://docs.nestjs.com/fundamentals/circular-dependency).
