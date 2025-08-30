@@ -185,3 +185,10 @@ Nest will now be able to resolve the dependencies of the `KeonksController` clas
 At this point, our directory structure should look like this:
 
 ![Provider-registration Image](./docs/images/provider-registration.png)
+
+## Manual instantiation
+
+So far, we've covered how Nest automatically handles most of the details of resolving dependencies. However, in some cases, you might need to step outside of the built-in Dependency Injection system and manually retrieve or instantiate providers. Two such techniques are briefly discussed below.
+
+- To retrieve existing instances or instantiate providers dynamically, you can use the [Module reference](https://docs.nestjs.com/fundamentals/module-ref).
+- To get providers within the `bootstrap()` function (e.g., for standalone applications or to use a configuration service during bootstrapping), check out [Standalone applications](https://docs.nestjs.com/standalone-applications).
