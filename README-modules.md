@@ -86,3 +86,15 @@ Now any module that imports the `KeonksModule` has access to the `KeonksService`
 If we were to directly register the `KeonksService` in every module that requires it, it would indeed work, but it would result in each module getting its own separate instance of the `KeonksService`. This can lead to increased memory usage since multiple instances of the same service are created, and it could also cause unexpected behavior, such as state inconsistency if the service maintains any internal state.
 
 By encapsulating the `KeonksService` inside a module, such as the `KeonksModule`, and exporting it, we ensure that the same instance of `KeonksService` is reused across all modules that import `KeonksModule`. This not only reduces memory consumption but also leads to more predictable behavior, as all modules share the same instance, making it easier to manage shared states or resources. This is one of the key benefits of modularity and dependency injection in frameworks like NestJS—allowing services to be efficiently shared throughout the application.
+
+## Module re-exporting
+
+As seen above, Modules can export their internal providers. In addition, they can re-export modules that they import. In the example below, the `CommonModule` is both imported into and exported from the `CoreModule`, making it available for other modules which import this one.
+
+```ts
+@Module({
+  imports: [CommonModule],
+  exports: [CommonModule],
+})
+export class CoreModule {}
+```
