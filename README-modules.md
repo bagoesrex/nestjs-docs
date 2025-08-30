@@ -56,4 +56,33 @@ export class AppModule {}
 
 Here is how our directory structure looks now:
 
-![Module-feature Image](./docs/images/module-feature.png)
+![Modules-feature Image](./docs/images/modules-feature.png)
+
+## Shared modules
+
+In Nest, modules are **singletons** by default, and thus you can share the same instance of any provider between multiple modules effortlessly.
+
+![Modules-v Image](./docs/images/modules-shared.png)
+
+Every module is automatically a **shared module**. Once created it can be reused by any module. Let's imagine that we want to share an instance of the `KeonksService` between several other modules. In order to do that, we first need to **export** the `KeonksService` provider by adding it to the module's `exports` array, as shown below:
+
+```ts
+keonks.module.ts;
+
+import { Module } from '@nestjs/common';
+import { KeonksController } from './keonks.controller';
+import { KeonksService } from './keonks.service';
+
+@Module({
+  controllers: [KeonksController],
+  providers: [KeonksService],
+  exports: [KeonksService],
+})
+export class KeonksModule {}
+```
+
+Now any module that imports the `KeonksModule` has access to the `KeonksService` and will share the same instance with all other modules that import it as well.
+
+If we were to directly register the `KeonksService` in every module that requires it, it would indeed work, but it would result in each module getting its own separate instance of the `KeonksService`. This can lead to increased memory usage since multiple instances of the same service are created, and it could also cause unexpected behavior, such as state inconsistency if the service maintains any internal state.
+
+By encapsulating the `KeonksService` inside a module, such as the `KeonksModule`, and exporting it, we ensure that the same instance of `KeonksService` is reused across all modules that import `KeonksModule`. This not only reduces memory consumption but also leads to more predictable behavior, as all modules share the same instance, making it easier to manage shared states or resources. This is one of the key benefits of modularity and dependency injection in frameworks like NestJS—allowing services to be efficiently shared throughout the application.
