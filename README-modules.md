@@ -145,3 +145,79 @@ The `@Global()` decorator makes the module global-scoped. Global modules should 
 
 > **Hint**
 > Making everything global is not recommended as a design practice. While global modules can help reduce boilerplate, it's generally better to use the `imports` array to make a module's API available to other modules in a controlled and clear way. This approach provides better structure and maintainability, ensuring that only the necessary parts of the module are shared with others while avoiding unnecessary coupling between unrelated parts of the application.
+
+## Dynamic modules
+
+Dynamic modules in Nest allow you to create modules that can be configured at runtime. This is especially useful when you need to provide flexible, customizable modules where the providers can be created based on certain options or configurations. Here's a brief overview of how **dynamic modules** work.
+
+```ts
+import { Module, DynamicModule } from '@nestjs/common';
+import { createDatabaseProviders } from './database.providers';
+import { Connection } from './connection.provider';
+
+@Module({
+  providers: [Connection],
+  exports: [Connection],
+})
+export class DatabaseModule {
+  static forRoot(entities = [], options?): DynamicModule {
+    const providers = createDatabaseProviders(options, entities);
+    return {
+      module: DatabaseModule,
+      providers: providers,
+      exports: providers,
+    };
+  }
+}
+```
+
+> **Hint**
+> The `forRoot()` method may return a dynamic module either synchronously or asynchronously (i.e., via a `Promise`).
+
+This module defines the `Connection` provider by default (in the `@Module()` decorator metadata), but additionally - depending on the `entities` and `options` objects passed into the `forRoot()` method - exposes a collection of providers, for example, repositories. Note that the properties returned by the dynamic module **extend** (rather than override) the base module metadata defined in the `@Module()` decorator. That's how both the statically declared `Connection` provider **and** the dynamically generated repository providers are exported from the module.
+
+If you want to register a dynamic module in the global scope, set the global property to true.
+
+```ts
+{
+  global: true,
+  module: DatabaseModule,
+  providers: providers,
+  exports: providers,
+}
+```
+
+> **Warning**
+> As mentioned above, making everything global **is not a good design decision**.
+
+The `DatabaseModule` can be imported and configured in the following manner:
+
+```ts
+import { Module } from '@nestjs/common';
+import { DatabaseModule } from './database/database.module';
+import { User } from './users/entities/user.entity';
+
+@Module({
+  imports: [DatabaseModule.forRoot([User])],
+})
+export class AppModule {}
+```
+
+If you want to in turn re-export a dynamic module, you can omit the `forRoot()` method call in the exports array:
+
+```ts
+import { Module } from '@nestjs/common';
+import { DatabaseModule } from './database/database.module';
+import { User } from './users/entities/user.entity';
+
+@Module({
+  imports: [DatabaseModule.forRoot([User])],
+  exports: [DatabaseModule],
+})
+export class AppModule {}
+```
+
+The [Dynamic modules](https://docs.nestjs.com/fundamentals/dynamic-modules) chapter covers this topic in greater detail, and includes a [working example](https://github.com/nestjs/nest/tree/master/sample/25-dynamic-modules).
+
+> **Hint**
+> Learn how to build highly customizable dynamic modules with the use of `ConfigurableModuleBuilder` here in [this chapter](https://docs.nestjs.com/fundamentals/dynamic-modules#configurable-module-builder).
