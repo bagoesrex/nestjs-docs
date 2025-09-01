@@ -120,3 +120,28 @@ export class KeonksModule {
 ```
 
 However, module classes themselves cannot be injected as providers due to [circular dependency](https://docs.nestjs.com/fundamentals/circular-dependency).
+
+## Global modules
+
+If you have to import the same set of modules everywhere, it can get tedious. Unlike in Nest, **Angular** `providers` are registered in the global scope. Once defined, they're available everywhere. Nest, however, encapsulates providers inside the module scope. You aren't able to use a module's providers elsewhere without first importing the encapsulating module.
+
+When you want to provide a set of providers which should be available everywhere out-of-the-box (e.g., helpers, database connections, etc.), make the module global with the `@Global()` decorator.
+
+```ts
+import { Module, Global } from '@nestjs/common';
+import { KeonksController } from './keonks.controller';
+import { KeonksService } from './keonks.service';
+
+@Global()
+@Module({
+  controllers: [KeonksController],
+  providers: [KeonksService],
+  exports: [KeonksService],
+})
+export class KeonksModule {}
+```
+
+The `@Global()` decorator makes the module global-scoped. Global modules should be registered only once, generally by the root or core module. In the above example, the `KeonksService` provider will be ubiquitous, and modules that wish to inject the service will not need to import the `KeonksModule` in their imports array.
+
+> **Hint**
+> Making everything global is not recommended as a design practice. While global modules can help reduce boilerplate, it's generally better to use the `imports` array to make a module's API available to other modules in a controlled and clear way. This approach provides better structure and maintainability, ensuring that only the necessary parts of the module are shared with others while avoiding unnecessary coupling between unrelated parts of the application.
