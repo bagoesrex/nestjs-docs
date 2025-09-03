@@ -33,3 +33,7 @@ export class LoggerMiddleware implements NestMiddleware {
   }
 }
 ```
+
+## Dependency injection
+
+Nest middleware fully supports Dependency Injection. Just as with providers and controllers, they are able to inject dependencies that are available within the same module. As usual, this is done through the `constructor`.
