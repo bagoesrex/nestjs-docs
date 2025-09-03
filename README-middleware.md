@@ -90,3 +90,26 @@ export class AppModule implements NestModule {
 
 > **Warning**
 > When using the `express` adapter, the NestJS app will register `json` and `urlencoded` from the package `body-parser` by default. This means if you want to customize that middleware via the `MiddlewareConsumer`, you need to turn off the global middleware by setting the `bodyParser` flag to `false` when creating the application with `NestFactory.create()`.
+
+## Route wildcards
+
+Pattern-based routes are also supported in NestJS middleware. For example, the named wildcard (`*splat`) can be used as a wildcard to match any combination of characters in a route. In the following example, the middleware will be executed for any route that starts with `abcd/`, regardless of the number of characters that follow.
+
+```ts
+forRoutes({
+  path: 'abcd/*splat',
+  method: RequestMethod.ALL,
+});
+```
+
+> **Hint**
+> `splat` is simply the name of the wildcard parameter and has no special meaning. You can name it anything you like, for example, `*wildcard`.
+
+The `'abcd/*'` route path will match `abcd/1`, `abcd/123`, `abcd/abc`, and so on. The hyphen (`-`) and the dot (`.`) are interpreted literally by string-based paths. However, `abcd/` with no additional characters will not match the route. For this, you need to wrap the wildcard in braces to make it optional:
+
+```ts
+forRoutes({
+  path: 'abcd/{*splat}',
+  method: RequestMethod.ALL,
+});
+```
