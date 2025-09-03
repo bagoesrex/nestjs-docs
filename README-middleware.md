@@ -37,3 +37,56 @@ export class LoggerMiddleware implements NestMiddleware {
 ## Dependency injection
 
 Nest middleware fully supports Dependency Injection. Just as with providers and controllers, they are able to inject dependencies that are available within the same module. As usual, this is done through the `constructor`.
+
+## Applying middleware
+
+There is no place for middleware in the `@Module()` decorator. Instead, we set them up using the `configure()` method of the module class. Modules that include middleware have to implement the `NestModule` interface. Let's set up the `LoggerMiddleware` at the `AppModule` level.
+
+```ts
+app.module.ts;
+
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { KeonksModule } from './keonks/keonks.module';
+
+@Module({
+  imports: [KeonksModule],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('keonks');
+  }
+}
+```
+
+In the above example we have set up the `LoggerMiddleware` for the `/keonks` route handlers that were previously defined inside the `KeonksController`. We may also further restrict a middleware to a particular request method by passing an object containing the route `path` and request `method` to the `forRoutes()` method when configuring the middleware. In the example below, notice that we import the `RequestMethod` enum to reference the desired request method type.
+
+```ts
+app.module.ts;
+
+import {
+  Module,
+  NestModule,
+  RequestMethod,
+  MiddlewareConsumer,
+} from '@nestjs/common';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { KeonksModule } from './keonks/keonks.module';
+
+@Module({
+  imports: [KeonksModule],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: 'keonks', method: RequestMethod.GET });
+  }
+}
+```
+
+> **Hint**
+> The `configure()` method can be made asynchronous using `async/await` (e.g., you can `await` completion of an asynchronous operation inside the `configure()` method body).
+
+> **Warning**
+> When using the `express` adapter, the NestJS app will register `json` and `urlencoded` from the package `body-parser` by default. This means if you want to customize that middleware via the `MiddlewareConsumer`, you need to turn off the global middleware by setting the `bodyParser` flag to `false` when creating the application with `NestFactory.create()`.
