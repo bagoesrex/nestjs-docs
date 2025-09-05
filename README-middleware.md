@@ -113,3 +113,28 @@ forRoutes({
   method: RequestMethod.ALL,
 });
 ```
+
+## Middleware consumer
+
+The `MiddlewareConsumer` is a helper class. It provides several built-in methods to manage middleware. All of them can be simply **chained** in the **fluent style**. The `forRoutes()` method can take a single string, multiple strings, a `RouteInfo` object, a controller class and even multiple controller classes. In most cases you'll probably just pass a list of controllers separated by commas. Below is an example with a single controller:
+
+```ts
+app.module.ts;
+
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { KeonksModule } from './keonks/keonks.module';
+import { KeonksController } from './keonks/keonks.controller';
+
+@Module({
+  imports: [KeonksModule],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes(KeonksController);
+  }
+}
+```
+
+> **Hint**
+> The `apply()` method may either take a single middleware, or multiple arguments to specify [multiple middlewares](https://docs.nestjs.com/middleware#multiple-middleware).
