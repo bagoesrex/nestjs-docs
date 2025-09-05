@@ -138,3 +138,27 @@ export class AppModule implements NestModule {
 
 > **Hint**
 > The `apply()` method may either take a single middleware, or multiple arguments to specify [multiple middlewares](https://docs.nestjs.com/middleware#multiple-middleware).
+
+## Excluding routes
+
+At times, we may want to exclude certain routes from having middleware applied. This can be easily achieved using the `exclude()` method. The `exclude()` method accepts a single string, multiple strings, or a `RouteInfo` object to identify the routes to be excluded.
+
+Here's an example of how to use it:
+
+```ts
+consumer
+  .apply(LoggerMiddleware)
+  .exclude(
+    { path: 'keonks', method: RequestMethod.GET },
+    { path: 'keonks', method: RequestMethod.POST },
+    'keonks/{*splat}',
+  )
+  .forRoutes(KeonksController);
+```
+
+> **Hint**
+> The `exclude()` method supports wildcard parameters using the [path-to-regexp](https://github.com/pillarjs/path-to-regexp#parameters) package.
+
+With the example above, `LoggerMiddleware` will be bound to all routes defined inside `KeonksController` **except** the three passed to the `exclude()` method.
+
+This approach provides flexibility in applying or excluding middleware based on specific routes or route patterns.
