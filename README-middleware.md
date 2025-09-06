@@ -188,3 +188,11 @@ consumer.apply(logger).forRoutes(KeonksController);
 
 > **Hint**
 > Consider using the simpler **functional middleware** alternative any time your middleware doesn't need any dependencies.
+
+## Multiple middleware
+
+As mentioned above, in order to bind multiple middleware that are executed sequentially, simply provide a comma separated list inside the `apply()` method:
+
+```ts
+consumer.apply(cors(), helmet(), logger).forRoutes(KeonksController);
+```
