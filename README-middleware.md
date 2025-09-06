@@ -196,3 +196,18 @@ As mentioned above, in order to bind multiple middleware that are executed seque
 ```ts
 consumer.apply(cors(), helmet(), logger).forRoutes(KeonksController);
 ```
+
+## Global middleware
+
+If we want to bind middleware to every registered route at once, we can use the `use()` method that is supplied by the `INestApplication` instance:
+
+```ts
+main.ts;
+
+const app = await NestFactory.create(AppModule);
+app.use(logger);
+await app.listen(process.env.PORT ?? 3000);
+```
+
+> **Hint**
+> Accessing the DI container in a global middleware is not possible. You can use a **functional middleware** instead when using `app.use()`. Alternatively, you can use a class middleware and consume it with `.forRoutes('*')` within the `AppModule` (or any other module).
