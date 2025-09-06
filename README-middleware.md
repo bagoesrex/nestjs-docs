@@ -162,3 +162,29 @@ consumer
 With the example above, `LoggerMiddleware` will be bound to all routes defined inside `KeonksController` **except** the three passed to the `exclude()` method.
 
 This approach provides flexibility in applying or excluding middleware based on specific routes or route patterns.
+
+## Functional middleware
+
+The `LoggerMiddleware` class we've been using is quite simple. It has no members, no additional methods, and no dependencies. Why can't we just define it in a simple function instead of a class? In fact, we can. This type of middleware is called **functional middleware**. Let's transform the logger middleware from class-based into functional middleware to illustrate the difference:
+
+```ts
+logger.middleware.ts;
+
+import { Request, Response, NextFunction } from 'express';
+
+export function logger(req: Request, res: Response, next: NextFunction) {
+  console.log(`Request...`);
+  next();
+}
+```
+
+And use it within the AppModule:
+
+```ts
+app.module.ts;
+
+consumer.apply(logger).forRoutes(KeonksController);
+```
+
+> **Hint**
+> Consider using the simpler **functional middleware** alternative any time your middleware doesn't need any dependencies.
