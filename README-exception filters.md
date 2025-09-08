@@ -87,3 +87,11 @@ Using the above, this is how the response would look:
   "error": "This is a custom message"
 }
 ```
+
+## Exceptions logging
+
+By default, the exception filter does not log built-in exceptions like `HttpException` (and any exceptions that inherit from it). When these exceptions are thrown, they won't appear in the console, as they are treated as part of the normal application flow. The same behavior applies to other built-in exceptions such as `WsException` and `RpcException`.
+
+These exceptions all inherit from the base `IntrinsicException` class, which is exported from the `@nestjs/common` package. This class helps differentiate between exceptions that are part of normal application operation and those that are not.
+
+If you want to log these exceptions, you can create a custom exception filter. We'll explain how to do this in the next section.
