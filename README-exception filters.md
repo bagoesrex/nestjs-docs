@@ -95,3 +95,28 @@ By default, the exception filter does not log built-in exceptions like `HttpExce
 These exceptions all inherit from the base `IntrinsicException` class, which is exported from the `@nestjs/common` package. This class helps differentiate between exceptions that are part of normal application operation and those that are not.
 
 If you want to log these exceptions, you can create a custom exception filter. We'll explain how to do this in the next section.
+
+## Custom exceptions
+
+In many cases, you will not need to write custom exceptions, and can use the built-in Nest HTTP exception, as described in the next section. If you do need to create customized exceptions, it's good practice to create your own **exceptions hierarchy**, where your custom exceptions inherit from the base `HttpException` class. With this approach, Nest will recognize your exceptions, and automatically take care of the error responses. Let's implement such a custom exception:
+
+```ts
+forbidden.exception.ts;
+
+export class ForbiddenException extends HttpException {
+  constructor() {
+    super('Forbidden', HttpStatus.FORBIDDEN);
+  }
+}
+```
+
+Since `ForbiddenException` extends the base `HttpException`, it will work seamlessly with the built-in exception handler, and therefore we can use it inside the `findAll()` method.
+
+```ts
+keonks.controller.ts;
+
+@Get()
+async findAll() {
+  throw new ForbiddenException();
+}
+```
