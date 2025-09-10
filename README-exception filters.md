@@ -120,3 +120,47 @@ async findAll() {
   throw new ForbiddenException();
 }
 ```
+
+## Built-in HTTP exceptions
+
+Nest provides a set of standard exceptions that inherit from the base `HttpException`. These are exposed from the `@nestjs/common` package, and represent many of the most common HTTP exceptions:
+
+- `BadRequestException`
+- `UnauthorizedException`
+- `NotFoundException`
+- `ForbiddenException`
+- `NotAcceptableException`
+- `RequestTimeoutException`
+- `ConflictException`
+- `GoneException`
+- `HttpVersionNotSupportedException`
+- `PayloadTooLargeException`
+- `UnsupportedMediaTypeException`
+- `UnprocessableEntityException`
+- `InternalServerErrorException`
+- `NotImplementedException`
+- `ImATeapotException`
+- `MethodNotAllowedException`
+- `BadGatewayException`
+- `ServiceUnavailableException`
+- `GatewayTimeoutException`
+- `PreconditionFailedException`
+
+All the built-in exceptions can also provide both an error `cause` and an error description using the `options` parameter:
+
+```ts
+throw new BadRequestException('Something bad happened', {
+  cause: new Error(),
+  description: 'Some error description',
+});
+```
+
+Using the above, this is how the response would look:
+
+```ts
+{
+  "message": "Something bad happened",
+  "error": "Some error description",
+  "statusCode": 400
+}
+```
