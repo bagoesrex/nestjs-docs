@@ -212,3 +212,83 @@ The `@Catch(HttpException)` decorator binds the required metadata to the excepti
 Let's look at the parameters of the `catch()` method. The `exception` parameter is the exception object currently being processed. The `host` parameter is an `ArgumentsHost` object. `ArgumentsHost` is a powerful utility object that we'll examine further in the [execution context chapter](https://docs.nestjs.com/fundamentals/execution-context)\*. In this code sample, we use it to obtain a reference to the `Request` and `Response` objects that are being passed to the original request handler (in the controller where the exception originates). In this code sample, we've used some helper methods on `ArgumentsHost` to get the desired `Request` and `Response` objects.
 
 The reason for this level of abstraction is that `ArgumentsHost` functions in all contexts (e.g., the HTTP server context we're working with now, but also Microservices and WebSockets). In the execution context chapter we'll see how we can access the appropriate [underlying arguments](https://docs.nestjs.com/fundamentals/execution-context#host-methods) for **any** execution context with the power of `ArgumentsHost` and its helper functions. This will allow us to write generic exception filters that operate across all contexts.
+
+## Binding filters
+
+Let's tie our new `HttpExceptionFilter` to the `KeonksController`'s `create()` method.
+
+```ts
+keonks.controller.ts
+
+@Post()
+@UseFilters(new HttpExceptionFilter())
+async create(@Body() createKeonkDto: CreateKeonkDto) {
+  throw new ForbiddenException();
+}
+```
+
+> **Hint**
+> The `@UseFilters()` decorator is imported from the `@nestjs/common` package.
+
+We have used the `@UseFilters()` decorator here. Similar to the `@Catch()` decorator, it can take a single filter instance, or a comma-separated list of filter instances. Here, we created the instance of `HttpExceptionFilter` in place. Alternatively, you may pass the class (instead of an instance), leaving responsibility for instantiation to the framework, and enabling **dependency injection**.
+
+```ts
+keonks.controller.ts;
+
+@Post()
+@UseFilters(HttpExceptionFilter)
+async create(@Body() createKeonkDto: CreateKeonkDto) {
+  throw new ForbiddenException();
+}
+```
+
+> **Hint**
+> Prefer applying filters by using classes instead of instances when possible. It reduces **memory usage** since Nest can easily reuse instances of the same class across your entire module.
+
+In the example above, the `HttpExceptionFilter` is applied only to the single `create()` route handler, making it method-scoped. Exception filters can be scoped at different levels: method-scoped of the controller/resolver/gateway, controller-scoped, or global-scoped. For example, to set up a filter as controller-scoped, you would do the following:
+
+```ts
+keonks.controller.ts;
+
+@Controller()
+@UseFilters(new HttpExceptionFilter())
+export class KeonksController {}
+```
+
+This construction sets up the `HttpExceptionFilter` for every route handler defined inside the `KeonksController`.
+
+To create a global-scoped filter, you would do the following:
+
+```ts
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new HttpExceptionFilter());
+  await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
+```
+
+> **Warning**
+> The `useGlobalFilters()` method does not set up filters for gateways or hybrid applications.
+
+Global-scoped filters are used across the whole application, for every controller and every route handler. In terms of dependency injection, global filters registered from outside of any module (with `useGlobalFilters()` as in the example above) cannot inject dependencies since this is done outside the context of any module. In order to solve this issue, you can register a global-scoped filter **directly from any module** using the following construction:
+
+```ts
+import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
+
+@Module({
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
+})
+export class AppModule {}
+```
+
+> **Hint**
+> When using this approach to perform dependency injection for the filter, note that regardless of the module where this construction is employed, the filter is, in fact, global. Where should this be done? Choose the module where the filter (`HttpExceptionFilter` in the example above) is defined. Also, `useClass` is not the only way of dealing with custom provider registration. Learn more here.
+
+You can add as many filters with this technique as needed; simply add each to the providers array.
