@@ -338,3 +338,44 @@ export class CatchEverythingFilter implements ExceptionFilter {
 
 > **Warning**
 > When combining an exception filter that catches everything with a filter that is bound to a specific type, the "Catch anything" filter should be declared first to allow the specific filter to correctly handle the bound type.
+
+## Inheritance
+
+Typically, you'll create fully customized exception filters crafted to fulfill your application requirements. However, there might be use-cases when you would like to simply extend the built-in default **global exception filter**, and override the behavior based on certain factors.
+
+In order to delegate exception processing to the base filter, you need to extend `BaseExceptionFilter` and call the inherited `catch()` method.
+
+```ts
+all_exceptions.filter.ts;
+
+import { Catch, ArgumentsHost } from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
+
+@Catch()
+export class AllExceptionsFilter extends BaseExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    super.catch(exception, host);
+  }
+}
+```
+
+> **Warning**
+> Method-scoped and Controller-scoped filters that extend the `BaseExceptionFilter` should not be instantiated with `new`. Instead, let the framework instantiate them automatically.
+
+Global filters **can** extend the base filter. This can be done in either of two ways.
+
+The first method is to inject the `HttpAdapter` reference when instantiating the custom global filter:
+
+```ts
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+
+  await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
+```
+
+The second method is to use the `APP_FILTER` token [as shown here](https://docs.nestjs.com/exception-filters#binding-filters).
