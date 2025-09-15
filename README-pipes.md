@@ -16,3 +16,22 @@ Nest comes with a number of built-in pipes that you can use out-of-the-box. You 
 
 > **Hint**
 > Pipes run inside the exceptions zone. This means that when a Pipe throws an exception it is handled by the exceptions layer (global exceptions filter and any **exceptions filters** that are applied to the current context). Given the above, it should be clear that when an exception is thrown in a Pipe, no controller method is subsequently executed. This gives you a best-practice technique for validating data coming into the application from external sources at the system boundary.
+
+## Built-in pipes
+
+Nest comes with several pipes available out-of-the-box:
+
+- `ValidationPipe`
+- `ParseIntPipe`
+- `ParseFloatPipe`
+- `ParseBoolPipe`
+- `ParseArrayPipe`
+- `ParseUUIDPipe`
+- `ParseEnumPipe`
+- `DefaultValuePipe`
+- `ParseFilePipe`
+- `ParseDatePipe`
+
+They're exported from the `@nestjs/common` package.
+
+Let's take a quick look at using `ParseIntPipe`. This is an example of the **transformation** use case, where the pipe ensures that a method handler parameter is converted to a JavaScript integer (or throws an exception if the conversion fails). Later in this chapter, we'll show a simple custom implementation for a `ParseIntPipe`. The example techniques below also apply to the other built-in transformation pipes (`ParseBoolPipe`, `ParseFloatPipe`, `ParseEnumPipe`, `ParseArrayPipe`, `ParseDatePipe`, and `ParseUUIDPipe`, which we'll refer to as the `Parse\*` pipes in this chapter).
