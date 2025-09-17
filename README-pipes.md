@@ -154,3 +154,34 @@ These properties describe the currently processed argument.
 
 > **Warning**
 > TypeScript interfaces disappear during transpilation. Thus, if a method parameter's type is declared as an interface instead of a class, the `metatype` value will be `Object`.
+
+## Schema based validation
+
+Let's make our validation pipe a little more useful. Take a closer look at the `create()` method of the `KeonksController`, where we probably would like to ensure that the post body object is valid before attempting to run our service method.
+
+```ts
+@Post()
+async create(@Body() createKeonkDto: CreateKeonkDto) {
+  this.keonksService.create(createKeonkDto);
+}
+```
+
+Let's focus in on the `createKeonkDto` body parameter. Its type is `CreateKeonkDto`:
+
+```ts
+create_keonk.dto.ts;
+
+export class CreateKeonkDto {
+  name: string;
+  age: number;
+  breed: string;
+}
+```
+
+We want to ensure that any incoming request to the create method contains a valid body. So we have to validate the three members of the `createKeonkDto` object. We could do this inside the route handler method, but doing so is not ideal as it would break the **single responsibility principle** (SRP).
+
+Another approach could be to create a **validator class** and delegate the task there. This has the disadvantage that we would have to remember to call this validator at the beginning of each method.
+
+How about creating validation middleware? This could work, but unfortunately, it's not possible to create **generic middleware** which can be used across all contexts across the whole application. This is because middleware is unaware of the **execution context**, including the handler that will be called and any of its parameters.
+
+This is, of course, exactly the use case for which pipes are designed. So let's go ahead and refine our validation pipe.
