@@ -185,3 +185,43 @@ Another approach could be to create a **validator class** and delegate the task 
 How about creating validation middleware? This could work, but unfortunately, it's not possible to create **generic middleware** which can be used across all contexts across the whole application. This is because middleware is unaware of the **execution context**, including the handler that will be called and any of its parameters.
 
 This is, of course, exactly the use case for which pipes are designed. So let's go ahead and refine our validation pipe.
+
+## Object schema validation
+
+There are several approaches available for doing object validation in a clean, **DRY** way. One common approach is to use **schema-based** validation. Let's go ahead and try that approach.
+
+The [Zod](https://zod.dev/) library allows you to create schemas in a straightforward way, with a readable API. Let's build a validation pipe that makes use of Zod-based schemas.
+
+Start by installing the required package:
+
+```ts
+$ npm install --save zod
+```
+
+In the code sample below, we create a simple class that takes a schema as a `constructor` argument. We then apply the `schema.parse()` method, which validates our incoming argument against the provided schema.
+
+As noted earlier, a **validation pipe** either returns the value unchanged or throws an exception.
+
+In the next section, you'll see how we supply the appropriate schema for a given controller method using the `@UsePipes()` decorator. Doing so makes our validation pipe reusable across contexts, just as we set out to do.
+
+```ts
+import {
+  PipeTransform,
+  ArgumentMetadata,
+  BadRequestException,
+} from '@nestjs/common';
+import { ZodSchema } from 'zod';
+
+export class ZodValidationPipe implements PipeTransform {
+  constructor(private schema: ZodSchema) {}
+
+  transform(value: unknown, metadata: ArgumentMetadata) {
+    try {
+      const parsedValue = this.schema.parse(value);
+      return parsedValue;
+    } catch (error) {
+      throw new BadRequestException('Validation failed');
+    }
+  }
+}
+```
