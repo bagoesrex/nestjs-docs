@@ -225,3 +225,49 @@ export class ZodValidationPipe implements PipeTransform {
   }
 }
 ```
+
+## Binding validation pipes
+
+Earlier, we saw how to bind transformation pipes (like `ParseIntPipe` and the rest of the `Parse*` pipes).
+
+Binding validation pipes is also very straightforward.
+
+In this case, we want to bind the pipe at the method call level. In our current example, we need to do the following to use the `ZodValidationPipe`:
+
+1. Create an instance of the ZodValidationPipe
+2. Pass the context-specific Zod schema in the class constructor of the pipe
+3. Bind the pipe to the method
+
+Zod schema example:
+
+```ts
+import { z } from 'zod';
+
+export const createKeonkSchema = z
+  .object({
+    name: z.string(),
+    age: z.number(),
+    breed: z.string(),
+  })
+  .required();
+
+export type CreateKeonkDto = z.infer<typeof createKeonkSchema>;
+```
+
+We do that using the `@UsePipes()` decorator as shown below:
+
+```ts
+keonks.controller.ts
+
+@Post()
+@UsePipes(new ZodValidationPipe(createKeonkSchema))
+async create(@Body() createKeonkDto: CreateKeonkDto) {
+  this.keonksService.create(createKeonkDto);
+}
+```
+
+> **Hint**
+> The `@UsePipes()` decorator is imported from the `@nestjs/common` package.
+
+> **Warning**
+> `zod` library requires the `strictNullChecks` configuration to be enabled in your `tsconfig.json` file.
