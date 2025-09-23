@@ -466,3 +466,19 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 ```
 
 We leave the implementation of this pipe to the reader, but note that like all other transformation pipes, it receives an input value (an `id`) and returns an output value (a `UserEntity` object). This can make your code more declarative and [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) by abstracting boilerplate code out of your handler and into a common pipe.
+
+## Providing defaults
+
+`Parse*` pipes expect a parameter's value to be defined. They throw an exception upon receiving `null` or `undefined` values. To allow an endpoint to handle missing querystring parameter values, we have to provide a default value to be injected before the `Parse*` pipes operate on these values. The `DefaultValuePipe` serves that purpose. Simply instantiate a `DefaultValuePipe` in the `@Query()` decorator before the relevant `Parse*` pipe, as shown below:
+
+```ts
+
+@Get()
+async findAll(
+  @Query('activeOnly', new DefaultValuePipe(false), ParseBoolPipe) activeOnly: boolean,
+  @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+) {
+  return this.keonksService.findAll({ activeOnly, page });
+}
+
+```
