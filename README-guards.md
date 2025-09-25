@@ -10,3 +10,34 @@ But middleware, by its nature, is dumb. It doesn't know which handler will be ex
 
 > **Hint**
 > Guards are executed **after** all middleware, but **before** any interceptor or pipe.
+
+## Authorization guard
+
+As mentioned, **authorization** is a great use case for Guards because specific routes should be available only when the caller (usually a specific authenticated user) has sufficient permissions. The `AuthGuard` that we'll build now assumes an authenticated user (and that, therefore, a token is attached to the request headers). It will extract and validate the token, and use the extracted information to determine whether the request can proceed or not.
+
+```ts
+auth.guard.ts;
+
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest();
+    return validateRequest(request);
+  }
+}
+```
+
+> **Hint**
+> If you are looking for a real-world example on how to implement an authentication mechanism in your application, visit [this chapter](https://docs.nestjs.com/security/authentication). Likewise, for more sophisticated authorization example, check [this page](https://docs.nestjs.com/security/authorization).
+
+The logic inside the `validateRequest()` function can be as simple or sophisticated as needed. The main point of this example is to show how guards fit into the request/response cycle.
+
+Every guard must implement a `canActivate()` function. This function should return a boolean, indicating whether the current request is allowed or not. It can return the response either synchronously or asynchronously (via a `Promise` or `Observable`). Nest uses the return value to control the next action:
+
+if it returns `true`, the request will be processed.
+if it returns `false`, Nest will deny the request.
