@@ -65,3 +65,56 @@ export class RolesGuard implements CanActivate {
   }
 }
 ```
+
+## Binding guards
+
+Like pipes and exception filters, guards can be **controller-scoped**, method-scoped, or global-scoped. Below, we set up a controller-scoped guard using the `@UseGuards()` decorator. This decorator may take a single argument, or a comma-separated list of arguments. This lets you easily apply the appropriate set of guards with one declaration.
+
+```ts
+@Controller('keonks')
+@UseGuards(RolesGuard)
+export class KeonksController {}
+```
+
+> **Hint**
+> The `@UseGuards()` decorator is imported from the `@nestjs/common` package.
+
+Above, we passed the `RolesGuard` class (instead of an instance), leaving responsibility for instantiation to the framework and enabling dependency injection. As with pipes and exception filters, we can also pass an in-place instance:
+
+```ts
+@Controller('keonks')
+@UseGuards(new RolesGuard())
+export class KeonksController {}
+```
+
+The construction above attaches the guard to every handler declared by this controller. If we wish the guard to apply only to a single method, we apply the `@UseGuards()` decorator at the **method level**.
+
+In order to set up a global guard, use the `useGlobalGuards()` method of the Nest application instance:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalGuards(new RolesGuard());
+```
+
+> **Notice**
+> In the case of hybrid apps the `useGlobalGuards()` method doesn't set up guards for gateways and microservices by default (see [Hybrid application](https://docs.nestjs.com/faq/hybrid-application) for information on how to change this behavior). For "standard" (non-hybrid) microservice apps, `useGlobalGuards()` does mount the guards globally.
+
+Global guards are used across the whole application, for every controller and every route handler. In terms of dependency injection, global guards registered from outside of any module (with `useGlobalGuards()` as in the example above) cannot inject dependencies since this is done outside the context of any module. In order to solve this issue, you can set up a guard directly from any module using the following construction:
+
+```ts
+import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+
+@Module({
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
+})
+export class AppModule {}
+```
+
+> **Hint**
+> When using this approach to perform dependency injection for the guard, note that regardless of the module where this construction is employed, the guard is, in fact, global. Where should this be done? Choose the module where the guard (`RolesGuard` in the example above) is defined. Also, `useClass` is not the only way of dealing with custom provider registration.
