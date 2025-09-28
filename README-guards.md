@@ -118,3 +118,35 @@ export class AppModule {}
 
 > **Hint**
 > When using this approach to perform dependency injection for the guard, note that regardless of the module where this construction is employed, the guard is, in fact, global. Where should this be done? Choose the module where the guard (`RolesGuard` in the example above) is defined. Also, `useClass` is not the only way of dealing with custom provider registration.
+
+## Setting roles per handler
+
+Our `RolesGuard` is working, but it's not very smart yet. We're not yet taking advantage of the most important guard feature - the [execution context](https://docs.nestjs.com/fundamentals/execution-context). It doesn't yet know about roles, or which roles are allowed for each handler. The `KeonksController`, for example, could have different permission schemes for different routes. Some might be available only for an admin user, and others could be open for everyone. How can we match roles to routes in a flexible and reusable way?
+
+This is where **custom metadata** comes into play. Nest provides the ability to attach custom **metadata** to route handlers through either decorators created via `Reflector.createDecorator` static method, or the built-in `@SetMetadata()` decorator.
+
+For example, let's create a `@Roles()` decorator using the `Reflector.createDecorator` method that will attach the metadata to the handler. `Reflector` is provided out of the box by the framework and exposed from the `@nestjs/core` package.
+
+```ts
+roles.decorator.ts;
+
+import { Reflector } from '@nestjs/core';
+
+export const Roles = Reflector.createDecorator<string[]>();
+```
+
+The `Roles` decorator here is a function that takes a single argument of type `string[]`.
+
+Now, to use this decorator, we simply annotate the handler with it:
+
+```ts
+@Post()
+@Roles(['admin'])
+async create(@Body() createKeonkDto: CreateKeonkDto) {
+  this.keonksService.create(createKeonkDto);
+}
+```
+
+Here we've attached the `Roles` decorator metadata to the `create()` method, indicating that only users with the `admin` role should be allowed to access this route.
+
+Alternatively, instead of using the `Reflector.createDecorator` method, we could use the built-in `@SetMetadata()` decorator.
