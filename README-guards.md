@@ -150,3 +150,57 @@ async create(@Body() createKeonkDto: CreateKeonkDto) {
 Here we've attached the `Roles` decorator metadata to the `create()` method, indicating that only users with the `admin` role should be allowed to access this route.
 
 Alternatively, instead of using the `Reflector.createDecorator` method, we could use the built-in `@SetMetadata()` decorator.
+
+## Putting it all together
+
+Let's now go back and tie this together with our `RolesGuard`. Currently, it simply returns `true` in all cases, allowing every request to proceed. We want to make the return value conditional based on comparing the **roles assigned to the current user** to the actual roles required by the current route being processed. In order to access the route's role(s) (custom metadata), we'll use the `Reflector` helper class again, as follows:
+
+```ts
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { Roles } from './roles.decorator';
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const roles = this.reflector.get(Roles, context.getHandler());
+    if (!roles) {
+      return true;
+    }
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    return matchRoles(roles, user.roles);
+  }
+}
+```
+
+> **Hint**
+> In the node.js world, it's common practice to attach the authorized user to the `request` object. Thus, in our sample code above, we are assuming that `request.user` contains the user instance and allowed roles. In your app, you will probably make that association in your custom **authentication guard** (or middleware).
+
+> **Warning**
+> The logic inside the `matchRoles()` function can be as simple or sophisticated as needed. The main point of this example is to show how guards fit into the request/response cycle.
+
+Refer to the [Reflection and metadata](https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata) section of the **Execution context** chapter for more details on utilizing `Reflector` in a context-sensitive way.
+
+When a user with insufficient privileges requests an endpoint, Nest automatically returns the following response:
+
+```json
+{
+  "statusCode": 403,
+  "message": "Forbidden resource",
+  "error": "Forbidden"
+}
+```
+
+Note that behind the scenes, when a guard returns `false`, the framework throws a `ForbiddenException`. If you want to return a different error response, you should throw your own specific exception. For example:
+
+```ts
+throw new UnauthorizedException();
+```
+
+Any exception thrown by a guard will be handled by the exceptions layer (global exceptions filter and any [exceptions filters](https://docs.nestjs.com/exception-filters) that are applied to the current context).
+
+> **Hint**
+> If you are looking for a real-world example on how to implement authorization, check [this chapter](https://docs.nestjs.com/security/authorization).
