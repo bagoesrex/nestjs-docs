@@ -33,7 +33,12 @@ Consider, for example, an incoming `POST /keonks` request. This request is desti
 The first use case we'll look at is to use an interceptor to log user interaction (e.g., storing user calls, asynchronously dispatching events or calculating a timestamp). We show a simple `LoggingInterceptor` below:
 
 ```ts
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -45,9 +50,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const now = Date.now();
     return next
       .handle()
-      .pipe(
-        tap(() => console.log(`After... ${Date.now() - now}ms`)),
-      );
+      .pipe(tap(() => console.log(`After... ${Date.now() - now}ms`)));
   }
 }
 ```
@@ -59,3 +62,64 @@ export class LoggingInterceptor implements NestInterceptor {
 > Interceptors, like controllers, providers, guards, and so on, can **inject dependencies** through their `constructor`.
 
 Since `handle()` returns an RxJS `Observable`, we have a wide choice of operators we can use to manipulate the stream. In the example above, we used the `tap()` operator, which invokes our anonymous logging function upon graceful or exceptional termination of the observable stream, but doesn't otherwise interfere with the response cycle.
+
+## Binding interceptors
+
+In order to set up the interceptor, we use the `@UseInterceptors()` decorator imported from the `@nestjs/common` package. Like **pipes** and **guards**, interceptors can be controller-scoped, method-scoped, or global-scoped.
+
+```ts
+keonks.controller.ts;
+
+@UseInterceptors(LoggingInterceptor)
+export class KeonksController {}
+```
+
+> **Hint**
+> The `@UseInterceptors()` decorator is imported from the `@nestjs/common` package.
+
+Using the above construction, each route handler defined in CatsController will use LoggingInterceptor. When someone calls the GET /cats endpoint, you'll see the following output in your standard output:
+
+```
+Before...
+After... 1ms
+```
+
+Note that we passed the `LoggingInterceptor` class (instead of an instance), leaving responsibility for instantiation to the framework and enabling dependency injection. As with pipes, guards, and exception filters, we can also pass an in-place instance:
+
+```ts
+keonks.controller.ts;
+
+@UseInterceptors(new LoggingInterceptor())
+export class KeonksController {}
+```
+
+As mentioned, the construction above attaches the interceptor to every handler declared by this controller. If we want to restrict the interceptor's scope to a single method, we simply apply the decorator at the method level.
+
+In order to set up a global interceptor, we use the `useGlobalInterceptors()` method of the Nest application instance:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalInterceptors(new LoggingInterceptor());
+```
+
+Global interceptors are used across the whole application, for every controller and every route handler. In terms of dependency injection, global interceptors registered from outside of any module (with `useGlobalInterceptors()`, as in the example above) cannot inject dependencies since this is done outside the context of any module. In order to solve this issue, you can set up an interceptor **directly from any module** using the following construction:
+
+```ts
+app.module.ts;
+
+import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+
+@Module({
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
+})
+export class AppModule {}
+```
+
+> **Hint**
+> When using this approach to perform dependency injection for the interceptor, note that regardless of the module where this construction is employed, the interceptor is, in fact, global. Where should this be done? Choose the module where the interceptor (`LoggingInterceptor` in the example above) is defined. Also, `useClass` is not the only way of dealing with custom provider registration.
