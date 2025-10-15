@@ -123,3 +123,72 @@ export class AppModule {}
 
 > **Hint**
 > When using this approach to perform dependency injection for the interceptor, note that regardless of the module where this construction is employed, the interceptor is, in fact, global. Where should this be done? Choose the module where the interceptor (`LoggingInterceptor` in the example above) is defined. Also, `useClass` is not the only way of dealing with custom provider registration.
+
+## Response mapping
+
+We already know that `handle()` returns an `Observable`. The stream contains the value returned from the route handler, and thus we can easily mutate it using RxJS's `map()` operator.
+
+> **Warning**
+> The response mapping feature doesn't work with the library-specific response strategy (using the `@Res()` object directly is forbidden).
+
+Let's create the `TransformInterceptor`, which will modify each response in a trivial way to demonstrate the process. It will use RxJS's `map()` operator to assign the response object to the `data` property of a newly created object, returning the new object to the client.
+
+```ts
+transform.interceptor.ts;
+
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+export interface Response<T> {
+  data: T;
+}
+
+@Injectable()
+export class TransformInterceptor<T>
+  implements NestInterceptor<T, Response<T>>
+{
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<Response<T>> {
+    return next.handle().pipe(map((data) => ({ data })));
+  }
+}
+```
+
+> **Hint**
+> Nest interceptors work with both synchronous and asynchronous `intercept()` methods. You can simply switch the method to `async` if necessary.
+
+With the above construction, when someone calls the `GET /keonks` endpoint, the response would look like the following (assuming that route handler returns an empty array `[]`):
+
+```
+{
+  "data": []
+}
+```
+
+Interceptors have great value in creating re-usable solutions to requirements that occur across an entire application. For example, imagine we need to transform each occurrence of a `null` value to an empty string `''`. We can do it using one line of code and bind the interceptor globally so that it will automatically be used by each registered handler.
+
+```ts
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+@Injectable()
+export class ExcludeNullInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(map((value) => (value === null ? '' : value)));
+  }
+}
+```
