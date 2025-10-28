@@ -52,3 +52,46 @@ async findOne(@User() user: UserEntity) {
   console.log(user);
 }
 ```
+
+## Passing data
+
+When the behavior of your decorator depends on some conditions, you can use the `data` parameter to pass an argument to the decorator's factory function. One use case for this is a custom decorator that extracts properties from the request object by key. Let's assume, for example, that our **authentication layer** validates requests and attaches a user entity to the request object. The user entity for an authenticated request might look like:
+
+```json
+{
+  "id": 101,
+  "firstName": "Keonk",
+  "lastName": "Jawa",
+  "email": "sikeonk@email.com",
+  "roles": ["etmin"]
+}
+```
+
+Let's define a decorator that takes a property name as key, and returns the associated value if it exists (or undefined if it doesn't exist, or if the `user` object has not been created).
+
+```ts
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+export const User = createParamDecorator(
+  (data: string, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    const user = request.user;
+
+    return data ? user?.[data] : user;
+  },
+);
+```
+
+Here's how you could then access a particular property via the `@User()` decorator in the controller:
+
+```ts
+@Get()
+async findOne(@User('firstName') firstName: string) {
+  console.log(`Hello ${firstName}`);
+}
+```
+
+You can use this same decorator with different keys to access different properties. If the `user` object is deep or complex, this can make for easier and more readable request handler implementations.
+
+> **Hint**
+> For TypeScript users, note that `createParamDecorator<T>()` is a generic. This means you can explicitly enforce type safety, for example `createParamDecorator<string>((data, ctx) => ...)`. Alternatively, specify a parameter type in the factory function, for example `createParamDecorator((data: string, ctx) => ...)`. If you omit both, the type for `data` will be `any`.
