@@ -95,3 +95,20 @@ You can use this same decorator with different keys to access different properti
 
 > **Hint**
 > For TypeScript users, note that `createParamDecorator<T>()` is a generic. This means you can explicitly enforce type safety, for example `createParamDecorator<string>((data, ctx) => ...)`. Alternatively, specify a parameter type in the factory function, for example `createParamDecorator((data: string, ctx) => ...)`. If you omit both, the type for `data` will be `any`.
+
+## Working with pipes
+
+Nest treats custom param decorators in the same fashion as the built-in ones `(@Body()`, `@Param()` and `@Query()`). This means that pipes are executed for the custom annotated parameters as well (in our examples, the `user` argument). Moreover, you can apply the pipe directly to the custom decorator:
+
+```ts
+@Get()
+async findOne(
+  @User(new ValidationPipe({ validateCustomDecorators: true }))
+  user: UserEntity,
+) {
+  console.log(user);
+}
+```
+
+> **Hint**
+> Note that `validateCustomDecorators` option must be set to true. `ValidationPipe` does not validate arguments annotated with the custom decorators by default.
