@@ -112,3 +112,33 @@ async findOne(
 
 > **Hint**
 > Note that `validateCustomDecorators` option must be set to true. `ValidationPipe` does not validate arguments annotated with the custom decorators by default.
+
+## Decorator composition
+
+Nest provides a helper method to compose multiple decorators. For example, suppose you want to combine all decorators related to authentication into a single decorator. This could be done with the following construction:
+
+```ts
+import { applyDecorators } from '@nestjs/common';
+
+export function Auth(...roles: Role[]) {
+  return applyDecorators(
+    SetMetadata('roles', roles),
+    UseGuards(AuthGuard, RolesGuard),
+    ApiBearerAuth(),
+    ApiUnauthorizedResponse({ description: 'Unauthorized' }),
+  );
+}
+```
+
+You can then use this custom `@Auth()` decorator as follows:
+
+```ts
+@Get('users')
+@Auth('admin')
+findAllUsers() {}
+```
+
+This has the effect of applying all four decorators with a single declaration.
+
+> **Warning**
+> The `@ApiHideProperty()` decorator from the `@nestjs/swagger` package is not composable and won't work properly with the `applyDecorators` function. 
